@@ -100,9 +100,15 @@ bool spawn(strvec_t& args)
     // Close the "write" end of the pipe.  Now the only process with the 
     // write-end of the pipe open is the child process we just launched
     close(fd[1]);
-    
-    // This read will block until the child process either writes something or closes the descriptor
-    return read(fd[0], buffer, 1) == 0;
+
+    // This read will block until the child process either writes something or closes the descriptor    
+    bool success = read(fd[0], buffer, 1) == 0;
+
+    // Close the read-end of the pipe
+    close(fd[0]);
+
+    // Tell the caller whether or not the program succesfully spawned
+    return success;
 }
 //==========================================================================================================
 
