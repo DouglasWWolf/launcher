@@ -209,16 +209,39 @@ void kill(int port)
 //==========================================================================================================
 // bring_down_system() - Use the process management ports to bring down the system
 //==========================================================================================================
-void bring_down_system()
+void bring_down_system(bool immediate)
 {
+    struct exe_t {string name; int port;} exe;
+
+    // A vector of the executable names and port # of their management ports
+    vector<exe_t> v;
+
+    // An reverse iterator to the vector immediately above
+    vector<exe_t>::reverse_iterator it;
+
     // Rewind the script that contains executables
     cs.rewind();
 
     // Fetch the UDP port number that serves as our base port
     int port = udp_base_port;
 
-    // Bring down each process one by one
-    while (cs.get_next_line()) kill(++port);
+    // Build a vector of executable names and their base ports
+    while (cs.get_next_line())
+    {
+        exe.name = cs.get_next_token();
+        exe.port = ++port;
+        v.push_back(exe);
+    }
+
+    // Walk through our executables in the opposite order in which they were launched
+    // and kill them one at a time.  The delay is in order to make sure the executable
+    // is really down before we move on to the next one
+    for (it = v.rbegin(); it != v.rend(); ++it)
+    {
+        if (!immediate) printf("Killing %s\n", it->name.c_str());
+        kill(it->port);
+        if (!immediate) usleep(500000);
+    }
 }
 //==========================================================================================================
 
@@ -259,7 +282,7 @@ void bring_up_system()
         if (!spawn(args))
         {
             printf("%s doesn't exist!\n", args[0].c_str());
-            bring_down_system();
+            bring_down_system(false);
             exit(1);
         }
 
@@ -283,7 +306,7 @@ int main(int argc, const char** argv)
     fetch_config();
 
     // Make sure all executables are down
-    bring_down_system();
+    bring_down_system(true);
 
     // If the user was just trying to bring the system down, we're done
     if (argv[1] && strcmp(argv[1], "down") == 0) exit(0);
