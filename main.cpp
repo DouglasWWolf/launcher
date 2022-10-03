@@ -209,7 +209,7 @@ void kill(int port)
 //==========================================================================================================
 // bring_down_system() - Use the process management ports to bring down the system
 //==========================================================================================================
-struct exe_t  {string name; int port;};
+struct exe_t {string name; int port;};
 
 void bring_down_system(bool immediate)
 {
