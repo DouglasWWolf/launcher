@@ -209,17 +209,21 @@ void kill(int port)
 //==========================================================================================================
 // bring_down_system() - Use the process management ports to bring down the system
 //==========================================================================================================
-struct exe_t  {string name; int port;};
-
 void bring_down_system(bool immediate)
 {
-    exe_t exe;
+    struct entry_t
+    {
+        string name;
+        int port;
+    };
+
+    entry_t exe;
 
     // A vector of the executable names and port # of their management ports
-    vector<exe_t> v;
+    vector<entry_t> v;
 
     // An reverse iterator to the vector immediately above
-    vector<exe_t>::reverse_iterator it;
+    vector<entry_t>::reverse_iterator it;
 
     // Rewind the script that contains executables
     cs.rewind();
